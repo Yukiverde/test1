@@ -15,7 +15,7 @@ body{
 }
 
 #game{
-    max-width:500px;
+    max-width:550px;
     margin:auto;
     background:white;
     border-radius:15px;
@@ -30,7 +30,8 @@ body{
 }
 
 .stat{
-    margin:10px 0;
+    margin:12px 0;
+    text-align:left;
 }
 
 .bar{
@@ -61,77 +62,89 @@ button:hover{
     opacity:0.9;
 }
 
-.feed{
-    background:#ffb347;
-}
-
-.play{
-    background:#66ccff;
-}
-
-.sleep{
-    background:#b19cd9;
-}
+.feed{background:#ffb347;}
+.play{background:#66ccff;}
+.sleep{background:#b19cd9;}
+.clean{background:#90EE90;}
 
 #message{
     margin-top:15px;
-    font-weight:bold;
     min-height:25px;
+    font-weight:bold;
 }
 
 #age{
     font-size:20px;
     margin-bottom:10px;
 }
+
+#status{
+    margin-bottom:10px;
+    font-size:18px;
+}
 </style>
 </head>
 <body>
 
 <div id="game">
+
     <h1>🐣 Tamagotchi</h1>
 
     <div id="age">Age: 0 days</div>
+    <div id="status">Status: Happy 😊</div>
 
     <div id="pet">🐣</div>
 
     <div class="stat">
-        Hunger
+        Hunger 🍎
         <div class="bar">
             <div id="hungerBar" class="fill"></div>
         </div>
     </div>
 
     <div class="stat">
-        Happiness
+        Happiness 🎉
         <div class="bar">
             <div id="happyBar" class="fill"></div>
         </div>
     </div>
 
     <div class="stat">
-        Energy
+        Energy ⚡
         <div class="bar">
             <div id="energyBar" class="fill"></div>
         </div>
     </div>
 
+    <div class="stat">
+        Cleanliness 🧼
+        <div class="bar">
+            <div id="cleanBar" class="fill"></div>
+        </div>
+    </div>
+
     <button class="feed" onclick="feedPet()">🍎 Feed</button>
-    <button class="play" onclick="playWithPet()">⚽ Play</button>
+    <button class="play" onclick="playPet()">⚽ Play</button>
     <button class="sleep" onclick="sleepPet()">😴 Sleep</button>
+    <button class="clean" onclick="cleanPet()">🧼 Clean</button>
 
     <div id="message"></div>
+
 </div>
 
 <script>
+
 let pet = {
-    hunger: 100,
-    happiness: 100,
-    energy: 100,
-    age: 0,
-    alive: true
+    hunger:100,
+    happiness:100,
+    energy:100,
+    cleanliness:100,
+    age:0,
+    alive:true
 };
 
 function updateDisplay(){
+
     document.getElementById("hungerBar").style.width =
         pet.hunger + "%";
 
@@ -141,70 +154,116 @@ function updateDisplay(){
     document.getElementById("energyBar").style.width =
         pet.energy + "%";
 
+    document.getElementById("cleanBar").style.width =
+        pet.cleanliness + "%";
+
     document.getElementById("age").textContent =
         "Age: " + pet.age + " days";
 
-    const petEmoji =
-        pet.age < 3 ? "🐣" :
-        pet.age < 8 ? "🐥" :
-        "🐤";
+    let emoji = "🐣";
 
-    document.getElementById("pet").textContent = petEmoji;
+    if(pet.age >= 3) emoji = "🐥";
+    if(pet.age >= 8) emoji = "🐤";
+    if(pet.age >= 15) emoji = "🐔";
+
+    document.getElementById("pet").textContent = emoji;
+
+    updateStatus();
 }
 
-function showMessage(text){
+function updateStatus(){
+
+    let lowest = Math.min(
+        pet.hunger,
+        pet.happiness,
+        pet.energy,
+        pet.cleanliness
+    );
+
+    let text = "Happy 😊";
+
+    if(lowest < 70) text = "Okay 😐";
+    if(lowest < 40) text = "Unhappy 😟";
+    if(lowest < 20) text = "Miserable 😭";
+
+    document.getElementById("status").textContent =
+        "Status: " + text;
+}
+
+function message(text){
     document.getElementById("message").textContent = text;
 }
 
 function feedPet(){
+
     if(!pet.alive) return;
 
     pet.hunger = Math.min(100, pet.hunger + 25);
-    showMessage("Yum! Thanks for feeding me!");
+
+    message("Yum! Delicious food!");
     updateDisplay();
 }
 
-function playWithPet(){
+function playPet(){
+
     if(!pet.alive) return;
 
     pet.happiness = Math.min(100, pet.happiness + 20);
     pet.energy = Math.max(0, pet.energy - 10);
+    pet.cleanliness = Math.max(0, pet.cleanliness - 5);
 
-    showMessage("That was fun!");
+    message("That was fun!");
     updateDisplay();
 }
 
 function sleepPet(){
+
     if(!pet.alive) return;
 
     pet.energy = Math.min(100, pet.energy + 30);
-    showMessage("Zzz... feeling refreshed!");
+
+    message("Zzz... feeling rested!");
+    updateDisplay();
+}
+
+function cleanPet(){
+
+    if(!pet.alive) return;
+
+    pet.cleanliness = Math.min(100, pet.cleanliness + 30);
+
+    message("Sparkling clean!");
     updateDisplay();
 }
 
 function gameOver(){
+
     pet.alive = false;
 
     document.getElementById("pet").textContent = "💀";
 
-    showMessage("Your pet has passed away...");
+    message("Your pet has passed away.");
 }
 
 function tick(){
+
     if(!pet.alive) return;
 
     pet.hunger -= Math.floor(Math.random()*4)+1;
     pet.happiness -= Math.floor(Math.random()*3)+1;
     pet.energy -= Math.floor(Math.random()*2)+1;
+    pet.cleanliness -= Math.floor(Math.random()*3)+1;
 
     pet.hunger = Math.max(0, pet.hunger);
     pet.happiness = Math.max(0, pet.happiness);
     pet.energy = Math.max(0, pet.energy);
+    pet.cleanliness = Math.max(0, pet.cleanliness);
 
     if(
         pet.hunger <= 0 ||
         pet.happiness <= 0 ||
-        pet.energy <= 0
+        pet.energy <= 0 ||
+        pet.cleanliness <= 0
     ){
         gameOver();
         return;
@@ -214,9 +273,11 @@ function tick(){
 }
 
 function ageUp(){
+
     if(!pet.alive) return;
 
     pet.age++;
+
     updateDisplay();
 }
 
@@ -224,6 +285,7 @@ updateDisplay();
 
 setInterval(tick, 5000);
 setInterval(ageUp, 20000);
+
 </script>
 
 </body>
